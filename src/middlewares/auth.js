@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const User = require('../models/auth');
 
 const idIsValid = (req, res, next) => {
@@ -57,9 +58,42 @@ const passwordIsValid = (req, res, next) => {
   }
 };
 
+const userExists = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) return res.status(422).json({ message: 'User not found', error: true });
+
+    return next();
+  } catch (err) {
+    return res.status(500).json({ message: `Server error: ${err.message}'`, error: true });
+  }
+};
+
+const checkPassword = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!password) return res.status(422).json({ message: 'Incorrect password', error: true });
+
+    const user = await User.findOne({ email });
+    const passwordIsCorrect = await bcrypt.compare(password, user.password);
+
+    if (!passwordIsCorrect) return res.status(422).json({ message: 'Incorrect password', error: true });
+
+    return next();
+  } catch (err) {
+    return res.status(500).json({ message: `Server error: ${err.message}'`, error: true });
+  }
+};
+
 module.exports = {
   idIsValid,
   nameIsValid,
   emailIsValid,
   passwordIsValid,
+  userExists,
+  checkPassword,
 };
