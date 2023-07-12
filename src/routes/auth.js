@@ -4,11 +4,14 @@ const {
   nameIsValid,
   emailIsValid,
   passwordIsValid,
+  checkPassword,
+  userExists,
 } = require('../middlewares/auth');
-const { createUserInTheDatabase } = require('../controllers/auth');
+const { createUserInTheDatabase, userLogin } = require('../controllers/auth');
 
 const router = Router();
 
 router.post('/signUp', idIsValid, nameIsValid, emailIsValid, passwordIsValid, createUserInTheDatabase);
+router.post('/signIn', userExists, checkPassword, userLogin);
 
 module.exports = router;
