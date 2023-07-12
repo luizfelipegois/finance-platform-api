@@ -13,7 +13,6 @@ const createUserInTheDatabase = async (req, res) => {
     } = req.body;
     const salt = await bcrypt.genSalt(12);
     const passwordHash = await bcrypt.hash(password, salt);
-    const token = await jwt.sign({ id, name, email }, secret, { expiresIn: '1h' });
     const user = new User({
       _id: id,
       name,
@@ -23,7 +22,20 @@ const createUserInTheDatabase = async (req, res) => {
 
     await user.save();
 
-    return res.status(201).json({ message: `authenticated as ${email}`, error: false, token });
+    return res.status(201).json({ message: `authenticated as ${email}`, error: false });
+  } catch (err) {
+    return res.status(500).json({ message: `Server error: ${err.message}`, error: true });
+  }
+};
+
+const userLogin = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const { _id, name, email: userEmail } = await User.findOne({ email });
+
+    const token = await jwt.sign({ id: _id, name, email }, secret, { expiresIn: '1h' });
+
+    return res.status(200).json({ message: `authenticated as ${userEmail}`, error: false, token });
   } catch (err) {
     return res.status(500).json({ message: `Server error: ${err.message}`, error: true });
   }
@@ -31,4 +43,5 @@ const createUserInTheDatabase = async (req, res) => {
 
 module.exports = {
   createUserInTheDatabase,
+  userLogin,
 };
