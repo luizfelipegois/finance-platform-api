@@ -41,7 +41,25 @@ const userLogin = async (req, res) => {
   }
 };
 
+const changeUserInformation = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { newPassword } = req.body;
+    const user = await User.findById(userId);
+    const salt = await bcrypt.genSalt(12);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+
+    user.password = passwordHash;
+    await user.save();
+
+    return res.status(201).json({ message: 'Password successfully updated' });
+  } catch (err) {
+    return res.status(500).json({ message: `Server error: ${err.message}`, error: true });
+  }
+};
+
 module.exports = {
   createUserInTheDatabase,
   userLogin,
+  changeUserInformation,
 };
