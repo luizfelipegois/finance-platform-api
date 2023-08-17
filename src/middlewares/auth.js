@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('../models/auth');
 
 const idIsValid = (req, res, next) => {
@@ -72,6 +73,20 @@ const userExists = async (req, res, next) => {
   }
 };
 
+const idExists = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id);
+
+    if (!user) return res.status(422).json({ message: 'User not found', error: true });
+
+    return next();
+  } catch (err) {
+    return res.status(500).json({ message: `Server error: ${err.message}'`, error: true });
+  }
+};
+
 const checkPassword = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -89,6 +104,39 @@ const checkPassword = async (req, res, next) => {
   }
 };
 
+const checkNewPassword = async (req, res, next) => {
+  try {
+    const { newPassword } = req.body;
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!newPassword) return res.status(422).json({ message: 'New Password is required', error: true });
+    if (!regex.test(newPassword)) return res.status(422).json({ message: 'Password must contain at least 8 characters and include at least one lowercase character, one uppercase character, one digit, and one special character (@, $, !, %, *, ?, or &)', error: true });
+
+    return next();
+  } catch (err) {
+    return res.status(500).json({ message: `Server error: ${err.message}'`, error: true });
+  }
+};
+
+const tokenIsValid = async (req, res, next) => {
+  try {
+    const { token } = req.headers;
+    const secret = process.env.SECRET;
+    const { id } = req.params;
+
+    if (!token) return res.status(511).json({ message: 'token is required', error: true });
+    if (!jwt.verify(token, secret)) return res.status(511).json({ message: 'Access denied', error: true });
+
+    const data = await jwt.decode(token, { payload: true });
+
+    if (id !== data.id) return res.status(511).json({ message: 'Access denied', error: true });
+
+    return next();
+  } catch (error) {
+    return res.status(500).json({ message: 'Access denied', error: true, errorMessage: error });
+  }
+};
+
 module.exports = {
   idIsValid,
   nameIsValid,
@@ -96,4 +144,7 @@ module.exports = {
   passwordIsValid,
   userExists,
   checkPassword,
+  idExists,
+  tokenIsValid,
+  checkNewPassword,
 };
