@@ -58,8 +58,39 @@ const changeUserInformation = async (req, res) => {
   }
 };
 
+const changePasswordWithoutLogin = async (req, res) => {
+  try {
+    const { newPassword, email } = req.body;
+    const user = await User.findOne({ email });
+    const salt = await bcrypt.genSalt(12);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+
+    user.password = passwordHash;
+    await user.save();
+
+    return res.status(201).json({ message: 'Password successfully updated' });
+  } catch (err) {
+    return res.status(500).json({ message: `Server error: ${err.message}`, error: true });
+  }
+};
+
+const checkEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    const { phone } = user;
+
+    return res.status(201).json({ phone, error: false, message: 'User found successfully' });
+  } catch (err) {
+    return res.status(500).json({ message: `Server error: ${err.message}`, error: true });
+  }
+};
+
 module.exports = {
   createUserInTheDatabase,
   userLogin,
   changeUserInformation,
+  changePasswordWithoutLogin,
+  checkEmail,
 };
