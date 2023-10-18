@@ -24,6 +24,6 @@ router.post('/signUp', idIsValid, nameIsValid, emailIsValid, passwordIsValid, cr
 router.post('/signIn', userExists, checkPassword, userLogin);
 router.put('/:id', idExists, checkNewPassword, tokenIsValid, changeUserInformation);
 router.patch('/newPassword', checkNewPassword, changePasswordWithoutLogin);
-router.get('/checkEmail', userExists, checkEmail);
+router.put('/checkEmail', userExists, checkEmail);
 
 module.exports = router;
