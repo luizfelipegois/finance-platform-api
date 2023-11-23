@@ -41,18 +41,48 @@ const userLogin = async (req, res) => {
   }
 };
 
-const changeUserInformation = async (req, res) => {
+const changePassword = async (req, res) => {
   try {
     const userId = req.params.id;
-    const { newPassword } = req.body;
+    const { password } = req.body;
     const user = await User.findById(userId);
     const salt = await bcrypt.genSalt(12);
-    const passwordHash = await bcrypt.hash(newPassword, salt);
+    const passwordHash = await bcrypt.hash(password, salt);
 
     user.password = passwordHash;
     await user.save();
 
-    return res.status(201).json({ message: 'Password successfully updated' });
+    return res.status(201).json({ message: 'Senha Atualizada', error: false });
+  } catch (err) {
+    return res.status(500).json({ message: `Server error: ${err.message}`, error: true });
+  }
+};
+
+const changeEmail = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { email } = req.body;
+    const user = await User.findById(userId);
+
+    user.email = email;
+    await user.save();
+
+    return res.status(201).json({ message: 'Email Atualizado', error: false });
+  } catch (err) {
+    return res.status(500).json({ message: `Server error: ${err.message}`, error: true });
+  }
+};
+
+const changePhone = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { phone } = req.body;
+    const user = await User.findById(userId);
+
+    user.phone = phone;
+    await user.save();
+
+    return res.status(201).json({ message: 'Número de celular Atualizado', error: false });
   } catch (err) {
     return res.status(500).json({ message: `Server error: ${err.message}`, error: true });
   }
@@ -60,15 +90,15 @@ const changeUserInformation = async (req, res) => {
 
 const changePasswordWithoutLogin = async (req, res) => {
   try {
-    const { newPassword, email } = req.body;
+    const { password, email } = req.body;
     const user = await User.findOne({ email });
     const salt = await bcrypt.genSalt(12);
-    const passwordHash = await bcrypt.hash(newPassword, salt);
+    const passwordHash = await bcrypt.hash(password, salt);
 
     user.password = passwordHash;
     await user.save();
 
-    return res.status(201).json({ message: 'Password successfully updated' });
+    return res.status(201).json({ message: 'Senha Atualizada', error: false });
   } catch (err) {
     return res.status(500).json({ message: `Server error: ${err.message}`, error: true });
   }
@@ -81,7 +111,7 @@ const checkEmail = async (req, res) => {
 
     const { phone } = user;
 
-    return res.status(201).json({ phone, error: false, message: 'User found successfully' });
+    return res.status(201).json({ phone, error: false, message: 'Usuário encontrado' });
   } catch (err) {
     return res.status(500).json({ message: `Server error: ${err.message}`, error: true });
   }
@@ -90,7 +120,9 @@ const checkEmail = async (req, res) => {
 module.exports = {
   createUserInTheDatabase,
   userLogin,
-  changeUserInformation,
+  changePassword,
   changePasswordWithoutLogin,
+  changeEmail,
   checkEmail,
+  changePhone,
 };

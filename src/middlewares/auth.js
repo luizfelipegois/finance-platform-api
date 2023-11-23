@@ -35,9 +35,25 @@ const emailIsValid = async (req, res, next) => {
     const regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
     const user = await User.findOne({ email });
 
-    if (!email) return res.status(422).json({ message: 'E-mail is required', error: true });
-    if (!regex.test(email)) return res.status(422).json({ message: 'Invalid email format', error: true });
-    if (user) return res.status(422).json({ message: 'E-mail already registered', error: true });
+    if (!email) return res.status(422).json({ message: 'Email é necessário', error: true });
+    if (!regex.test(email)) return res.status(422).json({ message: 'Formato de Email Inválido', error: true });
+    if (user) return res.status(422).json({ message: 'Email já registrado', error: true });
+
+    return next();
+  } catch (err) {
+    return res.status(500).json({ message: `Server error: ${err.message}'`, error: true });
+  }
+};
+
+const phoneIsValid = async (req, res, next) => {
+  try {
+    const { phone } = req.body;
+    const regex = /^(\+[0-9])((?!\1)[0-9]){12}$/;
+    const user = await User.findOne({ phone });
+
+    if (!phone) return res.status(422).json({ message: 'Número de telefone é necessário', error: true });
+    if (!regex.test(phone)) return res.status(422).json({ message: 'Formato inválido', error: true });
+    if (user) return res.status(422).json({ message: 'Número de telefone já registrado', error: true });
 
     return next();
   } catch (err) {
@@ -50,8 +66,8 @@ const passwordIsValid = (req, res, next) => {
     const { password } = req.body;
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-    if (!password) return res.status(422).json({ message: 'Password is required', error: true });
-    if (!regex.test(password)) return res.status(422).json({ message: 'Password must contain at least 8 characters and include at least one lowercase character, one uppercase character, one digit, and one special character (@, $, !, %, *, ?, or &)', error: true });
+    if (!password) return res.status(422).json({ message: 'Senha é necessária', error: true });
+    if (!regex.test(password)) return res.status(422).json({ message: 'A senha deve conter pelo menos 8 caracteres e incluir pelo menos um caractere minúsculo, um caractere maiúsculo, um dígito e um caractere especial (@, $, !, %, *, ?, ou &)', error: true });
 
     return next();
   } catch (err) {
@@ -65,7 +81,7 @@ const userExists = async (req, res, next) => {
 
     const user = await User.findOne({ email });
 
-    if (!user) return res.status(422).json({ message: 'User not found', error: true });
+    if (!user) return res.status(422).json({ message: 'Usuário não encontrado', error: true });
 
     return next();
   } catch (err) {
@@ -79,7 +95,7 @@ const idExists = async (req, res, next) => {
 
     const user = await User.findById(id);
 
-    if (!user) return res.status(422).json({ message: 'User not found', error: true });
+    if (!user) return res.status(422).json({ message: 'Usuário não encontrado', error: true });
 
     return next();
   } catch (err) {
@@ -91,26 +107,13 @@ const checkPassword = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    if (!password) return res.status(422).json({ message: 'Incorrect password', error: true });
+    if (!password) return res.status(422).json({ message: 'Senha é necessária', error: true });
+    if (!email) return res.status(422).json({ message: 'Email é necessário', error: true });
 
     const user = await User.findOne({ email });
     const passwordIsCorrect = await bcrypt.compare(password, user.password);
 
-    if (!passwordIsCorrect) return res.status(422).json({ message: 'Incorrect password', error: true });
-
-    return next();
-  } catch (err) {
-    return res.status(500).json({ message: `Server error: ${err.message}'`, error: true });
-  }
-};
-
-const checkNewPassword = async (req, res, next) => {
-  try {
-    const { newPassword } = req.body;
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-    if (!newPassword) return res.status(422).json({ message: 'New Password is required', error: true });
-    if (!regex.test(newPassword)) return res.status(422).json({ message: 'Password must contain at least 8 characters and include at least one lowercase character, one uppercase character, one digit, and one special character (@, $, !, %, *, ?, or &)', error: true });
+    if (!passwordIsCorrect) return res.status(422).json({ message: 'Senha incorreta', error: true });
 
     return next();
   } catch (err) {
@@ -124,16 +127,16 @@ const tokenIsValid = async (req, res, next) => {
     const secret = process.env.SECRET;
     const { id } = req.params;
 
-    if (!token) return res.status(511).json({ message: 'token is required', error: true });
-    if (!jwt.verify(token, secret)) return res.status(511).json({ message: 'Access denied', error: true });
+    if (!token) return res.status(511).json({ message: 'Token é necessario', error: true });
+    if (!jwt.verify(token, secret)) return res.status(511).json({ message: 'Acesso negado', error: true });
 
     const data = await jwt.decode(token, { payload: true });
 
-    if (id !== data.id) return res.status(511).json({ message: 'Access denied', error: true });
+    if (id !== data.id) return res.status(511).json({ message: 'Acesso negado', error: true });
 
     return next();
   } catch (error) {
-    return res.status(500).json({ message: 'Access denied', error: true, errorMessage: error });
+    return res.status(500).json({ message: 'Acesso negado', error: true, errorMessage: error });
   }
 };
 
@@ -146,5 +149,5 @@ module.exports = {
   checkPassword,
   idExists,
   tokenIsValid,
-  checkNewPassword,
+  phoneIsValid,
 };

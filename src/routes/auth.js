@@ -8,22 +8,26 @@ const {
   userExists,
   idExists,
   tokenIsValid,
-  checkNewPassword,
+  phoneIsValid,
 } = require('../middlewares/auth');
 const {
   createUserInTheDatabase,
   userLogin,
-  changeUserInformation,
+  changePassword,
   changePasswordWithoutLogin,
   checkEmail,
+  changeEmail,
+  changePhone,
 } = require('../controllers/auth');
 
 const router = Router();
 
 router.post('/signUp', idIsValid, nameIsValid, emailIsValid, passwordIsValid, createUserInTheDatabase);
 router.post('/signIn', userExists, checkPassword, userLogin);
-router.put('/:id', idExists, checkNewPassword, tokenIsValid, changeUserInformation);
-router.patch('/newPassword', checkNewPassword, changePasswordWithoutLogin);
-router.post('/checkEmail', userExists, checkEmail);
+router.put('/newPassword/:id', idExists, passwordIsValid, tokenIsValid, changePassword);
+router.put('/newEmail/:id', idExists, emailIsValid, tokenIsValid, changeEmail);
+router.put('/newPhone/:id', idExists, phoneIsValid, tokenIsValid, changePhone);
+router.put('/newPasswordWithoutLogin', userExists, passwordIsValid, changePasswordWithoutLogin);
+router.get('/checkEmail', userExists, checkEmail);
 
 module.exports = router;
