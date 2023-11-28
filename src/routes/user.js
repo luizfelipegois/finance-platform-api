@@ -3,10 +3,12 @@ const {
   idExists,
   tokenIsValid,
 } = require('../middlewares/auth');
-const { getInfoUser } = require('../controllers/user');
+const { getInfoUser, registerNewRequest } = require('../controllers/user');
+const { requestIsValid } = require('../middlewares/user');
 
 const router = Router();
 
 router.get('/:id', idExists, tokenIsValid, getInfoUser);
+router.put('/requests/:id', idExists, requestIsValid, tokenIsValid, registerNewRequest);
 
 module.exports = router;
