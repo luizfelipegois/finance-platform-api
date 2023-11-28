@@ -7,11 +7,9 @@ const requestIsValid = async (req, res, next) => {
     const regex = /^[\d,/.]+$/;
     const user = await User.findById(id);
     const { available } = user.datas;
-    const valueAvailable = parseFloat(available) * 1000;
-    const valueRequest = parseFloat(request) * 1000;
 
     if (!request) return res.status(422).json({ message: 'Informar o valor é necessário', error: true });
-    if (valueRequest > valueAvailable) return res.status(422).json({ message: 'O valor informado é maior do que o valor disponível para levantamento', error: true });
+    if (parseFloat(request.replace(/[,.]/g, '')) > parseFloat(available.replace(/[,.]/g, '')) || parseFloat(request.replace(/[,.]/g, '')) === 0) return res.status(422).json({ message: 'O valor informado é maior do que o valor disponível para levantamento', error: true });
     if (!regex.test(request)) return res.status(422).json({ message: 'O valor deve conter apenas números', error: true });
 
     return next();
