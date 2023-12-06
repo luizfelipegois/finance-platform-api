@@ -10,5 +10,6 @@ const router = Router();
 
 router.get('/:id', idExists, tokenIsValid, getInfoUser);
 router.put('/requests/:id', idExists, requestIsValid, tokenIsValid, registerNewRequest);
+router.put('/deposit/:id', idExists, requestIsValid, tokenIsValid, registerNewRequest);
 
 module.exports = router;

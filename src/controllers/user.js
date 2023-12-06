@@ -14,7 +14,7 @@ const getInfoUser = async (req, res) => {
 const registerNewRequest = async (req, res) => {
   try {
     const { id } = req.params;
-    const { request } = req.body;
+    const { request, type } = req.body;
     const user = await User.findById(id);
     const { requests } = user;
 
@@ -29,13 +29,14 @@ const registerNewRequest = async (req, res) => {
       value: request,
       status: 'pending',
       date: `${day}/${month}/${year}`,
+      type,
     });
 
     user.requests = array;
 
     await user.save();
 
-    return res.status(200).json({ message: 'Solicitação de levantamento recebida com sucesso', error: false });
+    return res.status(200).json({ message: 'Requisição recebida com sucesso', error: false });
   } catch (err) {
     return res.status(500).json({ message: `Server error: ${err.message}`, error: true });
   }
