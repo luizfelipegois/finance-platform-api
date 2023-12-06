@@ -1,14 +1,6 @@
 const { Router } = require('express');
 const {
-  idIsValid,
-  nameIsValid,
-  emailIsValid,
-  passwordIsValid,
-  checkPassword,
-  userExists,
-  idExists,
-  tokenIsValid,
-  phoneIsValid,
+  id, name, email, password, userExists, checkPassword, idExists, tokenIsValid, phone,
 } = require('../middlewares/auth');
 const {
   createUserInTheDatabase,
@@ -22,12 +14,12 @@ const {
 
 const router = Router();
 
-router.post('/signUp', idIsValid, nameIsValid, emailIsValid, passwordIsValid, createUserInTheDatabase);
+router.post('/signUp', id, name, email, password, createUserInTheDatabase);
 router.post('/signIn', userExists, checkPassword, userLogin);
-router.put('/newPassword/:id', idExists, passwordIsValid, tokenIsValid, changePassword);
-router.put('/newEmail/:id', idExists, emailIsValid, tokenIsValid, changeEmail);
-router.put('/newPhone/:id', idExists, phoneIsValid, tokenIsValid, changePhone);
-router.put('/newPasswordWithoutLogin', userExists, passwordIsValid, changePasswordWithoutLogin);
+router.put('/newPassword/:id', idExists, password, tokenIsValid, changePassword);
+router.put('/newEmail/:id', idExists, email, tokenIsValid, changeEmail);
+router.put('/newPhone/:id', idExists, phone, tokenIsValid, changePhone);
+router.put('/newPasswordWithoutLogin', userExists, password, changePasswordWithoutLogin);
 router.get('/checkEmail', userExists, checkEmail);
 
 module.exports = router;

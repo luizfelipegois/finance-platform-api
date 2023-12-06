@@ -1,5 +1,7 @@
 const User = require('../models/auth');
 
+const catchError = (res, err) => res.status(500).json({ message: `Server error: ${err.message}`, error: true });
+
 const getInfoUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -7,37 +9,37 @@ const getInfoUser = async (req, res) => {
 
     return res.status(200).json({ user });
   } catch (err) {
-    return res.status(500).json({ message: `Server error: ${err.message}`, error: true });
+    return catchError(res, err);
   }
 };
 
 const registerNewRequest = async (req, res) => {
   try {
     const { id } = req.params;
-    const { request } = req.body;
+    const { request, type } = req.body;
     const user = await User.findById(id);
     const { requests } = user;
 
-    const array = requests;
     const date = new Date();
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
 
-    array.push({
-      id: array.length,
+    const newRequest = {
+      id: requests.length,
       value: request,
       status: 'pending',
       date: `${day}/${month}/${year}`,
-    });
+      type,
+    };
 
-    user.requests = array;
+    user.requests = [...requests, newRequest];
 
     await user.save();
 
-    return res.status(200).json({ message: 'Solicitação de levantamento recebida com sucesso', error: false });
+    return res.status(200).json({ message: 'Requisição recebida com sucesso', error: false });
   } catch (err) {
-    return res.status(500).json({ message: `Server error: ${err.message}`, error: true });
+    return catchError(res, err);
   }
 };
 
